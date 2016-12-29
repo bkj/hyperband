@@ -17,13 +17,13 @@ class FasttextModel:
     def rand_config(self):
         config = {
             # Fixed
-            "input_file" : self.train_path,
-            "lr_freeze"  : 1,
-            "loss"       : "ns",
-            "save_vectors" : 0,
+            "input_file"         : self.train_path,
+            "lr_freeze"          : 1,
+            "save_vectors"       : 0,
             "save_label_vectors" : 0,
             
             # Random
+            "loss"        : np.random.choice(["ns", "hs"]),
             "neg"         : int(2 ** np.random.uniform(2, 5.5)),
             "lr"          : float(2 ** np.random.uniform(-10, -1)),
             "dim"         : int(2 ** np.random.uniform(2, 8)),
@@ -38,7 +38,7 @@ class FasttextModel:
         config['epoch'] = iters
         model = ft.supervised(**config)
         perf = model.test(self.dev_path)
-        return perf.precision
+        return -perf.precision
 
 # --
 # Run
@@ -47,10 +47,6 @@ train_path = './data/emojis-train.txt'
 dev_path = './data/emojis-dev.txt'
 
 ft_model = FasttextModel(train_path, dev_path)
-
-# Test Model
-config = ft_model.rand_config()
-ft_model.config2loss(iters=1, config=config)
 
 ft_hb = HyperBand(ft_model)
 ft_hb.run()
