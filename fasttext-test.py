@@ -20,6 +20,8 @@ class FasttextModel:
             "input_file" : self.train_path,
             "lr_freeze"  : 1,
             "loss"       : "ns",
+            "save_vectors" : 0,
+            "save_label_vectors" : 0,
             
             # Random
             "neg"         : int(2 ** np.random.uniform(2, 5.5)),
@@ -30,7 +32,6 @@ class FasttextModel:
         }
         
         config['output'] = './models/%s' % md5(json.dumps(config)).hexdigest()
-        print json.dumps(config)
         return config
         
     def config2loss(self, iters, config):
@@ -42,10 +43,15 @@ class FasttextModel:
 # --
 # Run
 
-train_path = './data/emoji-train.txt'
-dev_path = './data/emoji-dev.txt'
+train_path = './data/emojis-train.txt'
+dev_path = './data/emojis-dev.txt'
 
 ft_model = FasttextModel(train_path, dev_path)
+
+# Test Model
+config = ft_model.rand_config()
+ft_model.config2loss(iters=1, config=config)
+
 ft_hb = HyperBand(ft_model)
 ft_hb.run()
 
