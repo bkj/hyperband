@@ -44,6 +44,7 @@ class HyperBand:
                     self.total_iters += r_i
                     print config
                     val_loss = self.model.config2loss(iters=r_i, config=config)
+                    print "Loss: %f" % val_loss
                     val_losses.append(val_loss)
                 
                 these_results = zip(configs, val_losses, [r_i] * len(configs))
