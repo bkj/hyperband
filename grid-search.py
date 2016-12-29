@@ -81,31 +81,3 @@ for grid_point in expand_grid(all_params):
         raise
     except:
         print "error"
-
-
-open('all-results.json', 'w').write('\n'.join(map(json.dumps, all_results)))
-
-
-
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-from subprocess import Popen
-
-def show_plot(p='./tmp.png'):
-    plt.savefig(p)
-    plt.close()
-    Popen(('rsub %s' % p).split())
-
-pd.set_option('display.width', 150)
-df = pd.DataFrame(all_results)
-
-df.results = df.results.apply(lambda x: x['precision'])
-
-df = df.sort_values('results')
-
-df.tail(20)
-
-
-
-
