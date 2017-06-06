@@ -31,11 +31,11 @@ class FasttextModel:
             "word_ngrams" : int(np.random.choice(range(1, 7)))
         }
         
-        config['output'] = './models/%s' % md5(json.dumps(config)).hexdigest()
         return config
         
     def config2loss(self, iters, config):
-        config['epoch'] = iters
+        config['epoch']  = iters
+        config['output'] = './models/%s' % md5(json.dumps(config)).hexdigest()
         model = ft.supervised(**config)
         perf = model.test(self.dev_path)
         return -perf.precision

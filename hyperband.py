@@ -41,7 +41,7 @@ class HyperBand:
                 
                 val_losses = []
                 for config in configs:
-                    self.total_iters += r_i
+                    self.total_iters += r_i # This is wrong -- it's double counting
                     print config
                     val_loss = self.model.config2loss(iters=r_i, config=config)
                     print "Loss: %f" % val_loss
