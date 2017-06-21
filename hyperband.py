@@ -61,5 +61,5 @@ class HyperBand:
                 
                 results = sorted(results, key=lambda x: x['obj'])
                 n_keep = int(n * self.eta ** (-i - 1))
-                configs = [r['config'] for r in results[:n_keep]]
+                configs = [result['config'] for result in results[:n_keep]]
 
