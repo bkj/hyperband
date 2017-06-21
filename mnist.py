@@ -35,6 +35,7 @@ class MNISTModel:
     
         self.X_train, self.X_test, self.y_train, self.y_test = X_train, X_test, y_train, y_test
         self.input_shape = self.X_train.shape[1:]
+        self.n_classes = self.y_train.max() + 1
     
     def rand_config(self):
         return {
@@ -64,7 +65,7 @@ class MNISTModel:
         model.add(Flatten())
         model.add(Dense(config['dense_0'], activation='relu'))
         model.add(Dropout(config['dropout_1']))
-        model.add(Dense(n_classes, activation='softmax'))
+        model.add(Dense(self.n_classes, activation='softmax'))
         model.compile(loss='sparse_categorical_crossentropy', optimizer=config['optimizer'])
         return model
     
@@ -73,14 +74,14 @@ class MNISTModel:
         _ = model.fit(
             self.X_train, self.y_train,
             epochs=int(round(iters)),
-            batch_size=p['batch_size'],
+            batch_size=config['batch_size'],
             verbose=False
         )
         
-        preds = model.predict(X_test, batch_size=512).argmax(1)
+        preds = model.predict(self.X_test, batch_size=512).argmax(1)
         
         return {
-            "obj" : 1 - (preds == y_test).mean(),
+            "obj" : 1 - (preds == self.y_test).mean(),
             "config" : config,
             "iters" : iters
         }
@@ -89,4 +90,3 @@ if __name__ == "__main__":
     from hyperband import HyperBand
     model = MNISTModel()
     HyperBand(model).run()
-

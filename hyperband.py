@@ -10,6 +10,7 @@
     
 """
 
+import sys
 import numpy as np
 import ujson as json
 from math import log, ceil
@@ -38,12 +39,14 @@ class HyperBand:
             
             # initial configs
             configs = [self.model.rand_config() for _ in range(n)] 
+            
             for i in range(s + 1):
                 r_i = r * self.eta ** i
                 
+                print >> sys.stderr, "%d configs for %d iterations each" % (len(configs), int(round(r_i)))
+                
                 results = []
                 for config in configs:
-                    print >> sys.stderr, "S: %d | i: %d" % (s, i)
                     print >> sys.stderr, "Config: %s" % config
                     
                     res = self.model.config2loss(iters=r_i, config=config)
