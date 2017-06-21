@@ -43,7 +43,7 @@ class HyperBand:
             for i in range(s + 1):
                 r_i = r * self.eta ** i
                 
-                print >> sys.stderr, "%d configs for %d iterations each" % (len(configs), int(round(r_i)))
+                print >> sys.stderr, "\n -- %d configs @ %d iterations -- \n" % (len(configs), int(round(r_i)))
                 
                 results = []
                 for config in configs:
@@ -53,12 +53,13 @@ class HyperBand:
                     results.append(res)
                     
                     self.best_obj = min(res['obj'], self.best_obj)
-                    print >> sys.stderr,  "Objective: %f" % float(res['obj'])
-                    print >> sys.stderr, "Best Objective: %f" % self.best_obj
+                    print >> sys.stderr, \
+                        "Current: %f | Best: %f" % (float(res['obj']), self.best_obj)
                     
                     print json.dumps(res)
+                    sys.stdout.flush()
                 
                 results = sorted(results, key=lambda x: x['obj'])
                 n_keep = int(n * self.eta ** (-i - 1))
-                configs = results[:n_keep]
+                configs = [r['config'] for r in results[:n_keep]]
 
