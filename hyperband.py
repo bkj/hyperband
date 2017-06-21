@@ -7,8 +7,11 @@
     
     The algorithm is motivated by the idea that random search is pretty 
     good as far as black-box optimization goes, so let's try to do it faster.
+    
 """
 
+import numpy as np
+import ujson as json
 from math import log, ceil
 
 class HyperBand:
@@ -22,8 +25,7 @@ class HyperBand:
         self.s_max = int(log(max_iter) / log(eta))
         self.B = (self.s_max + 1) * max_iter  
         
-        self.history = []
-        self.total_iters = 0
+        self.best_obj = np.inf
     
     def run(self):
         for s in reversed(range(self.s_max + 1)):
@@ -39,18 +41,21 @@ class HyperBand:
             for i in range(s + 1):
                 r_i = r * self.eta ** i
                 
-                val_losses = []
+                results = []
                 for config in configs:
-                    self.total_iters += r_i # This is wrong -- it's double counting
-                    print config
-                    val_loss = self.model.config2loss(iters=r_i, config=config)
-                    print "Loss: %f" % val_loss
-                    val_losses.append(val_loss)
+                    print >> sys.stderr, "S: %d | i: %d" % (s, i)
+                    print >> sys.stderr, "Config: %s" % config
+                    
+                    res = self.model.config2loss(iters=r_i, config=config)
+                    results.append(res)
+                    
+                    self.best_obj = min(res['obj'], self.best_obj)
+                    print >> sys.stderr,  "Objective: %f" % float(res['obj'])
+                    print >> sys.stderr, "Best Objective: %f" % self.best_obj
+                    
+                    print json.dumps(res)
                 
-                these_results = zip(configs, val_losses, [r_i] * len(configs))
-                these_results = sorted(these_results, key=lambda x: x[1])
-                self.history += these_results
-                
+                results = sorted(results, key=lambda x: x['obj'])
                 n_keep = int(n * self.eta ** (-i - 1))
-                configs = [config for config,loss,iters in these_results[:n_keep]]
+                configs = results[:n_keep]
 
