@@ -7,7 +7,6 @@
     
     The algorithm is motivated by the idea that random search is pretty 
     good as far as black-box optimization goes, so let's try to do it faster.
-    
 """
 
 import sys
@@ -41,15 +40,17 @@ class HyperBand:
             configs = [self.model.rand_config() for _ in range(n)] 
             
             for i in range(s + 1):
+                
+                # number of iterations for these configs
                 r_i = r * self.eta ** i
                 
                 print >> sys.stderr, "\n -- %d configs @ %d iterations -- \n" % (len(configs), int(round(r_i)))
                 
                 results = []
                 for config in configs:
-                    print >> sys.stderr, "Config: %s" % config
+                    print >> sys.stderr, "Config %d: %s" % (i, json.dumps(config))
                     
-                    res = self.model.config2loss(iters=r_i, config=config)
+                    res = self.model.eval_config(config=config, iters=r_i)
                     results.append(res)
                     
                     self.best_obj = min(res['obj'], self.best_obj)

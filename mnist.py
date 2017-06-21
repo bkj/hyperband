@@ -69,7 +69,7 @@ class MNISTModel:
         model.compile(loss='sparse_categorical_crossentropy', optimizer=config['optimizer'])
         return model
     
-    def config2loss(self, iters, config):
+    def eval_config(self, config, iters):
         model = self._make_model(config)
         _ = model.fit(
             self.X_train, self.y_train,
@@ -89,4 +89,4 @@ class MNISTModel:
 if __name__ == "__main__":
     from hyperband import HyperBand
     model = MNISTModel()
-    HyperBand(model).run()
+    HyperBand(model, max_iter=8, eta=2).run()
