@@ -3,7 +3,6 @@
 """
 
 import numpy as np
-from hyperband import HyperBand
 
 class TestModel:
     
@@ -11,16 +10,14 @@ class TestModel:
         """ Returns random configuration """
         return np.random.normal(0.5, 0.1, 1)[0]
         
-    def config2loss(self, iters, config):
+    def eval_config(self, config, iters):
         """ Evaluates model w/ given configuration on validation data """
         return config / iters
 
 # --
 # Run
 
-model = TestModel()
-hb = HyperBand(model)
-hb.run()
-
-hb.total_iters
-hb.history[0]
+if __name__ == "__main__":
+    from hyperband import HyperBand
+    model = TestModel()
+    HyperBand(model).run()
