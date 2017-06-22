@@ -11,6 +11,8 @@ from hashlib import md5
 from keras.datasets import mnist
 from keras.models import Sequential
 from keras.layers import Conv2D, MaxPooling2D, Dropout, Flatten, Dense
+from keras.callbacks import EarlyStopping
+
 from sklearn.model_selection import train_test_split
 
 from keras import backend as K
@@ -71,16 +73,21 @@ class MNISTModel:
         model.add(Dense(config['dense_0'], activation='relu'))
         model.add(Dropout(config['dropout_1']))
         model.add(Dense(self.n_classes, activation='softmax'))
-        model.compile(loss='sparse_categorical_crossentropy', optimizer=config['optimizer'])
+        model.compile(loss='sparse_categorical_crossentropy', optimizer=config['optimizer'], metrics=['acc'])
         return model
     
-    def eval_config(self, config, iters):
+    def eval_config(self, config, iters, verbose=False):
         model = self._make_model(config)
+        
+        early_stopping = EarlyStopping(monitor='val_acc', patience=5, verbose=0)
+        
         _ = model.fit(
             self.X_train, self.y_train,
             epochs=int(round(iters)),
             batch_size=config['batch_size'],
-            verbose=False
+            verbose=verbose,
+            callbacks=[early_stopping],
+            validation_data=(self.X_val, self.y_val),
         )
         
         preds_val = model.predict(self.X_val, batch_size=512).argmax(1)
@@ -93,6 +100,7 @@ class MNISTModel:
             "obj" : 1 - acc_val,
             "config" : config,
             "iters" : iters,
+            "converged" : model.stop_training,
             "_meta" : {
                 "acc_val"  : acc_val,
                 "acc_test" : acc_test,
@@ -103,3 +111,8 @@ if __name__ == "__main__":
     from hyperband import HyperBand
     model = MNISTModel()
     HyperBand(model, max_iter=81, eta=3).run()
+
+self = MNISTModel()
+config = self.rand_config()
+self.eval_config(config, 10, verbose=True)
+

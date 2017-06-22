@@ -48,8 +48,8 @@ class HyperBand:
                 print >> sys.stderr, "\n -- %d configs @ %d iterations -- \n" % (len(configs), int(round(r_i)))
                 
                 results = []
-                for config in configs:
-                    print >> sys.stderr, "Config %d: %s" % (i, json.dumps(config))
+                for j, config in enumerate(configs):
+                    print >> sys.stderr, "Config %d: %s" % (j, json.dumps(config))
                     
                     res = self.model.eval_config(config=config, iters=r_i)
                     results.append(res)
@@ -61,8 +61,15 @@ class HyperBand:
                     print json.dumps(res)
                     sys.stdout.flush()
                 
-                results = sorted(results, key=lambda x: x['obj'])
                 self.history += results
+                
+                # Sort by objective value
+                results = sorted(results, key=lambda x: x['obj'])
+                
+                # Drop models that have already converged
+                results = filter(lambda x: not x.get('converged', False), results)
+                
+                # Determine how many configs to keep
                 n_keep = int(n * self.eta ** (-i - 1))
                 configs = [result['config'] for result in results[:n_keep]]
 
