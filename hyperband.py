@@ -26,6 +26,7 @@ class HyperBand:
         self.B = (self.s_max + 1) * max_iter  
         
         self.best_obj = np.inf
+        self.history = []
     
     def run(self):
         for s in reversed(range(self.s_max + 1)):
@@ -61,6 +62,7 @@ class HyperBand:
                     sys.stdout.flush()
                 
                 results = sorted(results, key=lambda x: x['obj'])
+                self.history += results
                 n_keep = int(n * self.eta ** (-i - 1))
                 configs = [result['config'] for result in results[:n_keep]]
 

@@ -11,6 +11,7 @@ from hashlib import md5
 from keras.datasets import mnist
 from keras.models import Sequential
 from keras.layers import Conv2D, MaxPooling2D, Dropout, Flatten, Dense
+from sklearn.model_selection import train_test_split
 
 from keras import backend as K
 def limit_mem():
@@ -27,13 +28,17 @@ class MNISTModel:
         (X_train, y_train), (X_test, y_test) = mnist.load_data()
         X_train = X_train.reshape(X_train.shape[0], 28, 28, 1)
         X_test = X_test.reshape(X_test.shape[0], 28, 28, 1)
-        input_shape = (28, 28, 1)
         X_train = X_train.astype('float32')
         X_test = X_test.astype('float32')
         X_train /= 255
         X_test /= 255
-    
-        self.X_train, self.X_test, self.y_train, self.y_test = X_train, X_test, y_train, y_test
+        
+        X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, train_size=0.8, random_state=123)
+        
+        self.X_train, self.y_train = X_train, y_train
+        self.X_val, self.y_val = X_val, y_val
+        self.X_test, self.y_test = X_test, y_test
+        
         self.input_shape = self.X_train.shape[1:]
         self.n_classes = self.y_train.max() + 1
     
@@ -78,15 +83,23 @@ class MNISTModel:
             verbose=False
         )
         
-        preds = model.predict(self.X_test, batch_size=512).argmax(1)
+        preds_val = model.predict(self.X_val, batch_size=512).argmax(1)
+        acc_val = (preds_val == self.y_val).mean()
+        
+        preds_test = model.predict(self.X_test, batch_size=512).argmax(1)
+        acc_test = (preds_test == self.y_test).mean()
         
         return {
-            "obj" : 1 - (preds == self.y_test).mean(),
+            "obj" : 1 - acc_val,
             "config" : config,
-            "iters" : iters
+            "iters" : iters,
+            "_meta" : {
+                "acc_val"  : acc_val,
+                "acc_test" : acc_test,
+            }
         }
 
 if __name__ == "__main__":
     from hyperband import HyperBand
     model = MNISTModel()
-    HyperBand(model, max_iter=8, eta=2).run()
+    HyperBand(model, max_iter=81, eta=3).run()
