@@ -38,7 +38,7 @@ class HyperBand:
             r = self.max_iter * self.eta ** (-s) 
             
             # initial configs
-            configs = [self.model.rand_config() for _ in range(n)] 
+            configs = self.model.random_configs(s=s, n=n)
             
             for i in range(s + 1):
                 
