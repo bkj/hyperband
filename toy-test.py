@@ -12,7 +12,10 @@ class TestModel:
         
     def eval_config(self, config, iters):
         """ Evaluates model w/ given configuration on validation data """
-        return config / iters
+        return {
+            "config" : config,
+            "obj" : config / iters
+        }
 
 # --
 # Run
