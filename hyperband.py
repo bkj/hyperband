@@ -30,7 +30,7 @@ class HyperBand:
         self.best_obj = np.inf
         self.history = []
     
-    def run(self):
+    def run(self, verbose=True):
         for s in reversed(range(self.s_max + 1)):
             
             # initial number of configs
@@ -47,17 +47,20 @@ class HyperBand:
                 # number of iterations for these configs
                 r_i = r * self.eta ** i
                 
-                print("\n -- %d configs @ %d iterations -- \n" % (len(configs), int(round(r_i))), file=sys.stderr)
+                if verbose:
+                    print("\n -- %d configs @ %d iterations -- \n" % (len(configs), int(round(r_i))), file=sys.stderr)
                 
                 results = []
                 for j, config in enumerate(configs):
-                    print("Config %d: %s" % (j, json.dumps(config)), file=sys.stderr)
+                    if verbose:
+                        print("Config %d: %s" % (j, json.dumps(config)), file=sys.stderr)
                     
                     res = self.model.eval_config(config=config, iters=r_i)
                     results.append(res)
                     
                     self.best_obj = min(res['obj'], self.best_obj)
-                    print("Current: %f | Best: %f" % (float(res['obj']), self.best_obj), file=sys.stderr)
+                    if verbose:
+                        print("Current: %f | Best: %f" % (float(res['obj']), self.best_obj), file=sys.stderr)
                     
                     print(json.dumps(res))
                     sys.stdout.flush()
